@@ -1,0 +1,86 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_NODES 100
+
+// Structure to represent an edge
+struct Edge {
+    int source, destination, weight;
+};
+
+// Structure to represent a subset for union-find
+struct Subset {
+    int parent, rank;
+};
+
+int find(struct Subset subsets[], int i) {
+    if (subsets[i].parent != i)
+        subsets[i].parent = find(subsets, subsets[i].parent);
+    return subsets[i].parent;
+}
+
+void unionSets(struct Subset subsets[], int x, int y) {
+    int xroot = find(subsets, x);
+    int yroot = find(subsets, y);
+
+    if (subsets[xroot].rank < subsets[yroot].rank)
+        subsets[xroot].parent = yroot;
+    else if (subsets[xroot].rank > subsets[yroot].rank)
+        subsets[yroot].parent = xroot;
+    else {
+        subsets[yroot].parent = xroot;
+        subsets[xroot].rank++;
+    }
+}
+
+int compareEdges(const void* a, const void* b) {
+    return ((struct Edge*)a)->weight - ((struct Edge*)b)->weight;
+}
+
+void kruskalMST(struct Edge edges[], int numEdges, int numNodes) {
+    struct Edge result[MAX_NODES];
+    int resultIndex = 0;
+
+    qsort(edges, numEdges, sizeof(struct Edge), compareEdges);
+
+    struct Subset subsets[MAX_NODES];
+    for (int i = 0; i < numNodes; ++i) {
+        subsets[i].parent = i;
+        subsets[i].rank = 0;
+    }
+
+    int edgeIndex = 0;
+    while (resultIndex < numNodes - 1) {
+        struct Edge nextEdge = edges[edgeIndex++];
+
+        int sourceRoot = find(subsets, nextEdge.source);
+        int destRoot = find(subsets, nextEdge.destination);
+
+        if (sourceRoot != destRoot) {
+            result[resultIndex++] = nextEdge;
+            unionSets(subsets, sourceRoot, destRoot);
+        }
+    }
+
+    printf("Minimum Spanning Tree:\n");
+    for (int i = 0; i < resultIndex; ++i) {
+        printf("%d -- %d : %d\n", result[i].source, result[i].destination, result[i].weight);
+    }
+}
+
+int main() {
+    int numNodes, numEdges;
+    printf("Enter the number of nodes and edges: ");
+    scanf("%d %d", &numNodes, &numEdges);
+
+    struct Edge edges[MAX_NODES];
+    printf("Enter the source, destination, and weight of each edge:\n");
+    for (int i = 0; i < numEdges; ++i) {
+        scanf("%d %d %d", &edges[i].source, &edges[i].destination, &edges[i].weight);
+    }
+
+    kruskalMST(edges, numEdges, numNodes);
+
+    return 0;
+}
+￼Enter
