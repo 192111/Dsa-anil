@@ -1,0 +1,92 @@
+#include <stdio.h>
+#include <stdbool.h>
+
+#define MAX_NODES 100
+
+int graph[MAX_NODES][MAX_NODES];
+bool visited[MAX_NODES];
+
+struct Queue {
+    int items[MAX_NODES];
+    int front;
+    int rear;
+};
+
+void enqueue(struct Queue* q, int value) {
+    if (q->rear == MAX_NODES - 1)
+        printf("Queue is full");
+    else {
+        if (q->front == -1)
+            q->front = 0;
+        q->rear++;
+        q->items[q->rear] = value;
+    }
+}
+
+int dequeue(struct Queue* q) {
+    int item;
+    if (q->front == -1) {
+        printf("Queue is empty");
+        item = -1;
+    } else {
+        item = q->items[q->front];
+        q->front++;
+        if (q->front > q->rear) {
+            q->front = q->rear = -1;
+        }
+    }
+    return item;
+}
+
+bool isEmpty(struct Queue* q) {
+    return q->front == -1;
+}
+
+void bfs(int start, int numNodes) {
+    struct Queue q;
+    q.front = -1;
+    q.rear = -1;
+
+    visited[start] = true;
+    enqueue(&q, start);
+
+    while (!isEmpty(&q)) {
+        int current = dequeue(&q);
+        printf("%d ", current);
+
+        for (int i = 0; i < numNodes; ++i) {
+            if (graph[current][i] && !visited[i]) {
+                visited[i] = true;
+                enqueue(&q, i);
+            }
+        }
+    }
+}
+
+int main() {
+    int numNodes;
+
+    printf("Enter the number of nodes: ");
+    scanf("%d", &numNodes);
+
+    printf("Enter the adjacency matrix of the graph:\n");
+    for (int i = 0; i < numNodes; ++i) {
+        for (int j = 0; j < numNodes; ++j) {
+            scanf("%d", &graph[i][j]);
+        }
+    }
+
+    for (int i = 0; i < numNodes; ++i) {
+        visited[i] = false;
+    }
+
+    int startNode;
+    printf("Enter the start node: ");
+    scanf("%d", &startNode);
+
+    printf("BFS traversal starting from node %d:\n", startNode);
+    bfs(startNode, numNodes);
+
+    return 0;
+}
+￼Enter
